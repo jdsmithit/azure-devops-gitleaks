@@ -18,6 +18,7 @@ async function run(): Promise<void> {
     const reportFormat = getAzureDevOpsInput('reportformat')
     const debug = taskLib.getVariable('system.debug')
     const reportPath = getReportPath(reportFormat)
+    const reportName = getAzureDevOpsInput('reportName')
 
     // Determine scanmode
     const scanMode = getAzureDevOpsInput('scanmode')
@@ -125,11 +126,15 @@ async function uploadResultsToAzureDevOps(reportPath: string): Promise<void> {
   }
 }
 
-function getReportPath(reportFormat: string): string {
+function getReportPath(reportFormat: string, reportName: string): string {
   const agentTempDirectory = getAzureDevOpsVariable('Agent.TempDirectory')
   const jobId = getAzureDevOpsVariable('System.JobId')
+  
+  if (reportName === null) {
+    reportName = `gitleaks-report-${jobId}`
+  }
 
-  const reportPath = Path.join(agentTempDirectory, `gitleaks-report-${jobId}.${reportFormat}`)
+  const reportPath = Path.join(agentTempDirectory, `${reportName}.${reportFormat}`)
   return reportPath
 }
 
